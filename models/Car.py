@@ -1,8 +1,3 @@
-from pyexpat import model
-
-from pip._internal import models
-
-
 class Car:
     models = {
         "audi": [
@@ -26,7 +21,6 @@ class Car:
         self.__model = None
         self.__brand = None
         self.__year = None
-
 
     @property
     def model(self):
