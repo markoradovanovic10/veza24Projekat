@@ -1,22 +1,14 @@
+from datetime import datetime, date
+from Models.Db import datebase_OPP2
 
-class Car:
-    VALID_CARS = {
-        "audi": [
-            {"name": "a4", "year": 2010, "rented": False, "rented_until": None},
-            {"name": "a5", "year": 2011, "rented": False, "rented_until": None},
-            {"name": "a6", "year": 2012, "rented": False, "rented_until": None}
-        ],
-        "bmw": [
-            {"name": "m3", "year": 2010, "rented": True, "rented_until": None},
-            {"name": "m5", "year": 2011, "rented": False, "rented_until": None},
-            {"name": "m6", "year": 2012, "rented": False, "rented_until": None}
-        ],
-        "mercedes": [
-            {"name": "c180", "year": 2010, "rented": False, "rented_until": None},
-            {"name": "c200", "year": 2011, "rented": False, "rented_until": None},
-            {"name": "c250", "year": 2012, "rented": False, "rented_until": None}
-        ]
-    }
+def get_cursor_and_connection():
+    db = datebase_OPP2()
+    conn = db._get_connection()
+    cursor = conn.cursor()
+    return cursor, conn
+
+
+class Car(datebase_OPP2):
 
     def __init__(self):
         self.__model = None
@@ -29,21 +21,7 @@ class Car:
 
     @model.setter
     def model(self, model):
-        if self.__brand is None:
-            raise ValueError("Brand must be set before model")
-        validated_models = []
-
-        for car in Car.VALID_CARS[self.__brand]:
-            validated_models.append(car["name"])
-
-        if model not in validated_models:
-            raise ValueError("Invalid model")
-
         self.__model = model
-
-        for car_model in Car.VALID_CARS[self.__brand]:
-            if car_model["name"] == model:
-                self.__year = car_model["year"]
 
     @property
     def brand(self):
@@ -51,9 +29,6 @@ class Car:
 
     @brand.setter
     def brand(self, brand):
-
-        if brand not in Car.VALID_CARS:
-            raise ValueError("Invalid brand")
         self.__brand = brand
 
     @property
@@ -62,8 +37,57 @@ class Car:
 
     @year.setter
     def year(self, year):
-        if self.__model is None:
-            raise ValueError("Model must be set before year")
-        if self.__model is not None and self.__year is not None:
-            raise ValueError("Year must be set before model")
         self.__year = year
+
+    def add_brand(self):
+        cursor, conn = get_cursor_and_connection()
+        cursor.execute("SELECT id FROM brand_for_rent WHERE LOWER(brand) = %s",(self.__brand.lower(),))
+        result = cursor.fetchone()
+        if result is not None:
+            raise ValueError("Brand already exists")
+        print(f"Adding brand:  {self.__brand} to database")
+        cursor.execute("INSERT INTO brand_for_rent (brand) VALUES (%s)", (self.__brand,))
+        conn.commit()
+        cursor.close()
+
+    def add_model(self):
+        cursor, conn = get_cursor_and_connection()
+        cursor.execute("SELECT id FROM brand_for_rent WHERE LOWER(brand) = %s",(self.__brand.lower(),))
+        result = cursor.fetchone()
+
+        if result is None:
+            raise ValueError("Brand must be set before model")
+        brand_id = result[0]
+
+        cursor.execute("INSERT INTO models_for_rent (brand, model, year, rented, rented_date) VALUES (%s, %s, %s, %s, %s)",(brand_id, self.__model, self.__year, 0, None))
+        conn.commit()
+        cursor.close()
+
+    def get_brand(self):
+        cursor, conn = get_cursor_and_connection()
+        cursor.execute("SELECT brand FROM brand_for_rent")
+        result = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        return result
+
+    def get_models(self):
+        cursor, conn = get_cursor_and_connection()
+        cursor.execute("""SELECT m.id, b.brand, m.model, m.year, m.rented, m.rented_date FROM models_for_rent AS m JOIN brand_for_rent AS b ON m.brand = b.id""")
+        result = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        return result
+
+    def rent_car(self, model_id, date_return):
+        cursor, conn = get_cursor_and_connection()
+        cursor.execute("UPDATE models_for_rent SET rented = %s, rented_date = %s WHERE id = %s",(1, date_return, model_id))
+        conn.commit()
+        cursor.close()
+
+
+
+test = Car()
+today = datetime.now()
+todayEXP = test.get_models()[0][5]
+

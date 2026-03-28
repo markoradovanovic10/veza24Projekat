@@ -1,9 +1,16 @@
 import pymysql
 
 
-class DB:
-    def __init__(self):
-        self.__connection = pymysql.connect(host="localhost", user="root", password="admin", db="oop_2")
+class datebase_OPP2:
+    __connection = pymysql.connect(host="localhost", user="root", password="admin", db="oop_2")
+
+    if __connection:
+        cont = True
+        print("Connection established")
+    else:
+        print("Connection failed")
+        exit(1)
 
     def _get_connection(self):
-        return self.__connection
+        return datebase_OPP2.__connection
+
