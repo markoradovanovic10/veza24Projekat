@@ -87,7 +87,4 @@ class Car(datebase_OPP2):
 
 
 
-test = Car()
-today = datetime.now()
-todayEXP = test.get_models()[0][5]
 
