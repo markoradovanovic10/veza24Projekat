@@ -1,19 +1,20 @@
+
 class Car:
-    models = {
+    VALID_CARS = {
         "audi": [
-            {"name": "a4", "year": 2010},
-            {"name": "a5", "year": 2011},
-            {"name": "a6", "year": 2012}
+            {"name": "a4", "year": 2010, "rented": False, "rented_until": None},
+            {"name": "a5", "year": 2011, "rented": False, "rented_until": None},
+            {"name": "a6", "year": 2012, "rented": False, "rented_until": None}
         ],
         "bmw": [
-            {"name": "m3", "year": 2010},
-            {"name": "m5", "year": 2011},
-            {"name": "m6", "year": 2012}
+            {"name": "m3", "year": 2010, "rented": True, "rented_until": None},
+            {"name": "m5", "year": 2011, "rented": False, "rented_until": None},
+            {"name": "m6", "year": 2012, "rented": False, "rented_until": None}
         ],
         "mercedes": [
-            {"name": "c180", "year": 2010},
-            {"name": "c200", "year": 2011},
-            {"name": "c250", "year": 2012}
+            {"name": "c180", "year": 2010, "rented": False, "rented_until": None},
+            {"name": "c200", "year": 2011, "rented": False, "rented_until": None},
+            {"name": "c250", "year": 2012, "rented": False, "rented_until": None}
         ]
     }
 
@@ -32,7 +33,7 @@ class Car:
             raise ValueError("Brand must be set before model")
         validated_models = []
 
-        for car in Car.models[self.__brand]:
+        for car in Car.VALID_CARS[self.__brand]:
             validated_models.append(car["name"])
 
         if model not in validated_models:
@@ -40,7 +41,7 @@ class Car:
 
         self.__model = model
 
-        for car_model in Car.models[self.__brand]:
+        for car_model in Car.VALID_CARS[self.__brand]:
             if car_model["name"] == model:
                 self.__year = car_model["year"]
 
@@ -51,7 +52,7 @@ class Car:
     @brand.setter
     def brand(self, brand):
 
-        if brand not in Car.models:
+        if brand not in Car.VALID_CARS:
             raise ValueError("Invalid brand")
         self.__brand = brand
 
@@ -66,9 +67,3 @@ class Car:
         if self.__model is not None and self.__year is not None:
             raise ValueError("Year must be set before model")
         self.__year = year
-
-
-Audi = Car()
-Audi.brand = "audi"
-Audi.model = "a4"
-print(Audi.model + " " + Audi.brand + " " + str(Audi.year))
