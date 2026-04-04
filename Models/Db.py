@@ -2,7 +2,7 @@ import pymysql
 
 
 class datebase_OPP2:
-    __connection = pymysql.connect(host="localhost", user="root", password="admin", db="oop_2")
+    __connection = pymysql.connect(host="localhost", user="root", password="", db="oop_2")
 
     if __connection:
         cont = True
